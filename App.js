@@ -2,7 +2,7 @@
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
-// import { useEffect } from "react";
+// import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
@@ -26,17 +26,21 @@ const openDatabase = async () => {
 };
 // const db = openDatabase();
 
-const getData = () => {
-  // console.log(db);
+const getDestinations = () => {
   openDatabase().then((db) => {
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT name FROM dim_destination",
         [],
-        (trans, result) => {
-          console.log(result.rows._array);
+        (_, result) => {
+          // console.log(result.rows._array);
+          let destinationList = [];
+          for (let i = 0; i < result.rows.length; ++i)
+            destinationList.push(result.rows.item(i).name);
+          // setFlatListItems(destinationList);
+          console.log(destinationList);
         },
-        (trans, error) => console.log("Error ", error)
+        (_, error) => console.log(error)
       );
     });
   });
@@ -51,7 +55,7 @@ export default function App() {
     } else {
       console.log("Bus 332");
     }
-    console.log(getData());
+    console.log(getDestinations());
 
     // fetchData = () => {
     //   db.transaction((tx) => {
