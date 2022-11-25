@@ -47,13 +47,7 @@ const promiseDestinations = (db) => {
     // });
   });
 };
-// const destinations = ["1"];
-// const [destinations, setDestinations] = useState([]);
-// const getDestinations = async () => {
-//   let result = await promiseDestinations();
-//   setDestinations(result);
-// return result;
-// };
+
 // DB ACCESS END
 
 export default function App() {
