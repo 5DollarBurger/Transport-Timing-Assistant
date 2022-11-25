@@ -2,11 +2,11 @@
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
-// import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
-const destinations = ["Tsing Yi", "Kwai Fong"];
+// const destinations = ["Tsing Yi", "Kwai Fong"];
 
 // DB ACCESS START
 // const db = SQLite.openDatabase("departures.db");
@@ -26,53 +26,47 @@ const openDatabase = async () => {
 };
 // const db = openDatabase();
 
-const getDestinations = () => {
-  openDatabase().then((db) => {
+const promiseDestinations = (db) => {
+  return new Promise((resolve, reject) => {
+    // openDatabase().then((db) => {
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT name FROM dim_destination",
         [],
-        (_, result) => {
+        (trans, result) => {
           // console.log(result.rows._array);
           let destinationList = [];
           for (let i = 0; i < result.rows.length; ++i)
             destinationList.push(result.rows.item(i).name);
           // setFlatListItems(destinationList);
-          console.log(destinationList);
+          resolve(destinationList);
         },
-        (_, error) => console.log(error)
+        (trans, error) => reject(error)
       );
     });
+    // });
   });
 };
+// const destinations = ["1"];
+// const [destinations, setDestinations] = useState([]);
+// const getDestinations = async () => {
+//   let result = await promiseDestinations();
+//   setDestinations(result);
+// return result;
+// };
 // DB ACCESS END
 
 export default function App() {
-  function destinationHandler(selectedDestination) {
-    // console.log(selectedDestination);
-    if (selectedDestination == "Tsing Yi") {
-      console.log("Bus 330");
-    } else {
-      console.log("Bus 332");
-    }
-    console.log(getDestinations());
+  const [destinations, setDestinations] = useState([]);
 
-    // fetchData = () => {
-    //   db.transaction((tx) => {
-    //     // sending 4 arguments in executeSql
-    //     tx.executeSql(
-    //       "SELECT name FROM dim_destination",
-    //       null, // passing sql query and parameters:null
-    //       // success callback which sends two things Transaction object and ResultSet Object
-    //       (txObj, { rows: { _array } }) => this.setState(({ data: _array }),
-    //       // failure callback which sends two things Transaction object and Error
-    //       (txObj, error) => console.log("Error ", error)
-    //     ); // end executeSQL
-    //   }); // end transaction
-    // };
+  async function fetchDestinations() {
+    const db = await openDatabase();
+    const destinationList = await promiseDestinations(db);
+    setDestinations(destinationList);
   }
+  fetchDestinations();
 
-  function getVehicle() {}
+  const destinationHandler = (selectedDestination) => {};
 
   return (
     <View style={styles.appContainer}>
