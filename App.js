@@ -6,10 +6,8 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
-// const destinations = ["Tsing Yi", "Kwai Fong"];
-
 // DB ACCESS START
-// const db = SQLite.openDatabase("departures.db");
+
 const openDatabase = async () => {
   if (
     (await FileSystem.getInfoAsync(FileSystem.documentDirectory + "SQLite"))
@@ -24,27 +22,20 @@ const openDatabase = async () => {
   }
   return alert("SQLite database not found");
 };
-// const db = openDatabase();
 
 const promiseDestinations = (db) => {
   return new Promise((resolve, reject) => {
-    // openDatabase().then((db) => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT name FROM dim_destination",
+        "SELECT * FROM dim_destination",
         [],
         (trans, result) => {
-          // console.log(result.rows._array);
-          let destinationList = [];
-          for (let i = 0; i < result.rows.length; ++i)
-            destinationList.push(result.rows.item(i).name);
-          // setFlatListItems(destinationList);
-          resolve(destinationList);
+          const destinationData = result.rows._array;
+          resolve(destinationData);
         },
         (trans, error) => reject(error)
       );
     });
-    // });
   });
 };
 
@@ -52,25 +43,39 @@ const promiseDestinations = (db) => {
 
 export default function App() {
   const [destinations, setDestinations] = useState([]);
+  const [selectedDestination, setSelectedDestination] = useState("");
+  const [vehicleNumber, setVehicleNumber] = useState("");
 
   async function fetchDestinations() {
-    const db = await openDatabase();
-    const destinationList = await promiseDestinations(db);
-    setDestinations(destinationList);
+    try {
+      const db = await openDatabase();
+      const destinationData = await promiseDestinations(db);
+      setDestinations(destinationData);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
-  fetchDestinations();
+  if (destinations.length == 0) {
+    fetchDestinations();
+  }
 
-  const destinationHandler = (selectedDestination) => {};
+  const destinationHandler = (selectedDestination) => {
+    setSelectedDestination(selectedDestination);
+    setVehicleNumber("330");
+  };
 
   return (
     <View style={styles.appContainer}>
       <View>
         {/* <TextInput placeholder="Your destination"></TextInput>
         <Button title="Enter" /> */}
-        <SelectDropdown data={destinations} onSelect={destinationHandler} />
+        <SelectDropdown
+          data={destinations.map((destination) => destination.name)}
+          onSelect={destinationHandler}
+        />
       </View>
       <View>
-        <Text>Results...</Text>
+        <Text>Vehicle Number: {vehicleNumber}</Text>
       </View>
       {/* <StatusBar style="auto" /> */}
     </View>
